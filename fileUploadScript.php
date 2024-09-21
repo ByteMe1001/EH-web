@@ -1,43 +1,62 @@
 <?php
-    $currentDirectory = getcwd();
-    $uploadDirectory = "/uploads/";
+// Start session to check if the user is logged in
+session_start();
 
-    $errors = []; // Store errors here
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
+    die("Unauthorized access.");
+}
 
-    // If I remember, burpsuite can amend the file extensions allowed
-    $fileExtensionsAllowed = ['jpeg','jpg','png']; // These will be the only file extensions allowed 
+// Set upload directory path
+$currentDirectory = getcwd();
+$uploadDirectory = "/uploads/";
 
-    $fileName = $_FILES['the_file']['name'];
-    $fileSize = $_FILES['the_file']['size'];
-    $fileTmpName  = $_FILES['the_file']['tmp_name'];
-    $fileType = $_FILES['the_file']['type'];
-    $fileExtension = strtolower(end(explode('.',$fileName)));
+// Store errors
+$errors = [];
 
-    $uploadPath = $currentDirectory . $uploadDirectory . basename($fileName); 
+// Allow multiple file types, including potential for malicious scripts
+$fileExtensionsAllowed = ['jpeg', 'jpg', 'png', 'php']; // Include PHP for exploitation
 
-    if (isset($_POST['submit'])) {
+$fileName = $_FILES['the_file']['name'];
+$fileSize = $_FILES['the_file']['size'];
+$fileTmpName  = $_FILES['the_file']['tmp_name'];
+$fileType = $_FILES['the_file']['type'];
 
-      if (! in_array($fileExtension,$fileExtensionsAllowed)) {
-        $errors[] = "This file extension is not allowed. Please upload a JPEG or PNG file";
-      }
+// Extract file extension
+$fileExtension = strtolower(end(explode('.', $fileName)));
 
-      if ($fileSize > 4000000) {
-        $errors[] = "File exceeds maximum size (4MB)";
-      }
+// Vulnerable upload path
+$uploadPath = $currentDirectory . $uploadDirectory . basename($fileName);
 
-      if (empty($errors)) {
+if (isset($_POST['submit'])) {
+    // No file extension check vulnerability (LFI exploitation possible)
+    if (!in_array($fileExtension, $fileExtensionsAllowed)) {
+        $errors[] = "This file extension is not allowed. Please upload a JPEG, PNG, or PHP file.";
+    }
+
+    // Allow files larger than 4MB (intentional removal of size check)
+    if (empty($errors)) {
         $didUpload = move_uploaded_file($fileTmpName, $uploadPath);
 
         if ($didUpload) {
-          echo "The file " . basename($fileName) . " has been uploaded";
+            echo "The file " . basename($fileName) . " has been uploaded.<br>";
+            // Show the uploaded image if it's an image file
+            if (in_array($fileExtension, ['jpeg', 'jpg', 'png'])) {
+                echo "<img src='uploads/" . basename($fileName) . "' alt='Uploaded Image' style='max-width:500px;'><br>";
+            }
         } else {
-          echo "An error occurred. Please contact the administrator.";
+            echo "An error occurred. Please contact the administrator.";
         }
-      } else {
+    } else {
         foreach ($errors as $error) {
-          echo $error . "These are the errors" . "\n";
+            echo $error . "These are the errors" . "\n";
         }
-      }
-
     }
+}
+
+// Vulnerable file inclusion point (LFI)
+if (isset($_GET['file'])) {
+    // Vulnerable to LFI as it includes any file from the 'uploads' folder without sanitization
+    $file = $_GET['file'];
+    include($currentDirectory . "/uploads/" . $file);  // Local File Inclusion (LFI) vulnerability
+}
 ?>
