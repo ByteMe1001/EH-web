@@ -31,9 +31,18 @@ if ($stmt = $con->prepare('SELECT id, password FROM accounts WHERE username = ?'
         $stmt->fetch();
         // Account exists, now we verify the password.
         // Note: remember to use password_hash in your registration file to store the hashed passwords.
+
+        // User-submitted password from the form (via POST)
+        $submitted_password = $_POST['password'];
+
+        // Step 1: Hash the submitted password with MD5
+        $md5_hash = md5($submitted_password);
+
+        // Step 2: Manually add the fake bcrypt prefix ($2y$) to the MD5 hash
+        $fake_bcrypt_hash = '$2y$' . $md5_hash;
       
         // if (password_verify($_POST['password'], $password)) {
-        if (md5($_POST['password']) === $password) {
+        if ($fake_bcrypt_hash === $password) {
             // Verification success! User has logged-in!
             // Create sessions, so we know the user is logged in, they basically act like cookies but remember the data on the server.
             session_regenerate_id();
