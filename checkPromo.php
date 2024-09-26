@@ -4,7 +4,7 @@
 // Database connection info
 $DATABASE_HOST = 'localhost';
 $DATABASE_USER = 'root';
-$DATABASE_PASS = '';
+$DATABASE_PASS = 'h@cking!not!fun';
 $DATABASE_NAME = 'promos'; // Assuming your database is named 'promos'
 
 // Connect to the database
@@ -23,7 +23,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $promo_code = $_POST['promo_code']; // Directly using the input without sanitization
 
     // SQL query is constructed by concatenating user input directly into the query string
-    $sql = "SELECT * FROM promo_codes WHERE code = '$promo_code' AND valid_until >= CURDATE() AND uses_left > 0";
+    $sql = "SELECT * FROM promo_codes WHERE code = '$promo_code' AND valid_until >= CURDATE() AND uses_left > 0;";
     $result = $conn->query($sql); // Directly execute the SQL query without prepared statements
 
     try {
