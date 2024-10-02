@@ -1,11 +1,14 @@
 <?php
 // check_promo.php
 
-// Database connection info
-$DATABASE_HOST = 'localhost';
-$DATABASE_USER = 'root';
-$DATABASE_PASS = 'h@cking!not!fun';
-$DATABASE_NAME = 'promos'; // Assuming your database is named 'promos'
+// Load the db.ini file
+$db_config = parse_ini_file('/var/www/db.ini');
+
+// Extract the credentials
+$DATABASE_HOST = $db_config['host'];
+$DATABASE_USER = $db_config['username'];
+$DATABASE_PASS = $db_config['password'];
+$DATABASE_NAME = $db_config['database2'];
 
 // Connect to the database
 $conn = mysqli_connect($DATABASE_HOST, $DATABASE_USER, $DATABASE_PASS, $DATABASE_NAME);
@@ -24,23 +27,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // SQL query is constructed by concatenating user input directly into the query string
     $sql = "SELECT * FROM promo_codes WHERE code = '$promo_code' AND valid_until >= CURDATE() AND uses_left > 0;";
-    $result = $conn->query($sql); // Directly execute the SQL query without prepared statements
+    $result = $conn->query($sql); // Directly execute the SQL query 
 
     try {
         $result = $conn->query($sql);
         
-        if ($result !== false) {
-            if ($result->num_rows > 0) {
-                while ($row = $result->fetch_assoc()) {
-                    foreach ($row as $key => $value) {
-                        echo htmlspecialchars($key) . ": " . htmlspecialchars($value) . "<br>";
-                    }
-                    echo "<br>";
-                }
-            } else {
-                echo "No Promo Code found.<br>";
-            }
+        if ($result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            echo "Promo code is valid! Discount: " . $row['discount_percentage'] . "%";
+            
+        } else {
+            echo "Invalid or expired promo code.";
         }
+
     } catch (mysqli_sql_exception $e) {
         echo "SQL Error: " . htmlspecialchars($e->getMessage()) . "<br>";
     }
